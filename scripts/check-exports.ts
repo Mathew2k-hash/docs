@@ -48,10 +48,36 @@ const TYPE_ONLY_SYMBOLS = new Set<string>([
   "GeneratedStealthAddress",
   "Announcement",
   "MatchedAnnouncement",
-  // CKB  (same logical names, CKB-specific shapes)
+  "StealthMetaAddress",
+  // CKB
   "StealthCell",
   "MatchedStealthCell",
-  // Stellar / Solana types share the same names as EVM — covered above
+  // Stellar / Solana federation types
+  "FederationRecord",
+  "FederationError",
+  "FederationErrorCode",
+  "FederationCache",
+  // Root sdk types
+  "AnnouncementStream",
+  "AnnouncementsStreamOptions",
+  "WraithConfig",
+  "AgentConfig",
+  "AgentInfo",
+  "ChatResponse",
+  "ToolCall",
+  "Balance",
+  "Payment",
+  "Invoice",
+  "Schedule",
+  "TxResult",
+  "PrivacyReport",
+  "Notification",
+  "Conversation",
+  "RetentionConfig",
+  "ViewTagFilter",
+  "StreamCacheOptions",
+  "BackpressureOptions",
+  "StreamError",
 ]);
 
 // ─── MDX import extraction ────────────────────────────────────────────────────
@@ -89,6 +115,7 @@ async function extractImports(files: string[]): Promise<ImportEntry[]> {
         .split(",")
         .map((s) => s.replace(/\/\/[^\n]*/g, "").trim()) // strip inline comments
         .map((s) => s.replace(/\s+as\s+\S+/g, "").trim()) // strip "as alias" clauses
+        .map((s) => s.replace(/^type\s+/, "").trim())      // strip inline "type " modifier
         .filter(Boolean);
 
       if (symbols.length > 0) {
@@ -191,7 +218,34 @@ function buildCjsFixture(importMap: ImportMap): string {
   return out.join("\n");
 }
 
-// ─── helpers ──────────────────────────────────────────────────────────────────
+// ─── package availability check ──────────────────────────────────────────────
+
+/**
+ * Return true if the npm package that owns `specifier` is installed.
+ * For scoped packages like "@wraith-protocol/sdk-react" the package root is
+ * node_modules/@wraith-protocol/sdk-react.
+ * For sub-path exports like "@wraith-protocol/sdk/chains/evm" the package
+ * root is node_modules/@wraith-protocol/sdk.
+ */
+function packageRootFromSpecifier(specifier: string): string {
+  // Strip sub-path: "@scope/pkg/a/b" → "@scope/pkg"
+  const parts = specifier.split("/");
+  const pkgName = specifier.startsWith("@")
+    ? parts.slice(0, 2).join("/")   // @scope/name
+    : parts[0];                      // name
+  return path.join(REPO_ROOT, "node_modules", pkgName);
+}
+
+async function isPackageInstalled(specifier: string): Promise<boolean> {
+  const pkgRoot = packageRootFromSpecifier(specifier);
+  try {
+    await readFile(path.join(pkgRoot, "package.json"), "utf8");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 
 function run(
   command: string,
@@ -270,11 +324,33 @@ async function main() {
     process.exit(1);
   }
 
-  // Print discovery summary
-  const totalSymbols = [...importMap.values()].reduce((n, s) => n + s.size, 0);
-  console.log(`Scanned ${mdxFiles.length} MDX file(s).\n`);
-  console.log("Documented entry points and symbols:");
+  // ── 1b. Filter out entry points whose package is not installed ─────────────
+  // Companion packages (e.g. @wraith-protocol/sdk-react) are documented here
+  // but are not dependencies of this repo. Skip them with a warning rather
+  // than hard-failing — their exports are tested in their own packages.
+  const skippedSpecifiers: string[] = [];
+  const checkableMap: ImportMap = new Map();
+
   for (const [specifier, symbols] of importMap) {
+    if (await isPackageInstalled(specifier)) {
+      checkableMap.set(specifier, symbols);
+    } else {
+      skippedSpecifiers.push(specifier);
+    }
+  }
+
+  // Print discovery summary
+  const totalSymbols = [...checkableMap.values()].reduce((n, s) => n + s.size, 0);
+  console.log(`Scanned ${mdxFiles.length} MDX file(s).\n`);
+
+  if (skippedSpecifiers.length > 0) {
+    console.log("⚠️  Skipped (package not installed in this repo):");
+    for (const s of skippedSpecifiers) console.log(`  ${s}`);
+    console.log();
+  }
+
+  console.log("Documented entry points to check:");
+  for (const [specifier, symbols] of checkableMap) {
     console.log(`  ${specifier}`);
     for (const sym of symbols) {
       const tag = TYPE_ONLY_SYMBOLS.has(sym) ? " (type-only)" : "";
@@ -282,8 +358,13 @@ async function main() {
     }
   }
   console.log(
-    `\nTotal: ${importMap.size} entry point(s), ${totalSymbols} unique symbol(s).\n`,
+    `\nTotal: ${checkableMap.size} entry point(s), ${totalSymbols} unique symbol(s).\n`,
   );
+
+  if (checkableMap.size === 0) {
+    console.error("No installed entry points to check. Exiting.");
+    process.exit(1);
+  }
 
   // ── 2. Write fixtures into a temp dir ─────────────────────────────────────
   const tmpDir = await mkdtemp(path.join(tmpdir(), "wraith-exports-check-"));
@@ -303,8 +384,8 @@ async function main() {
     const esmFixture = path.join(tmpDir, "fixture.esm.mts");
     const cjsFixture = path.join(tmpDir, "fixture.cjs.cts");
 
-    await writeFile(esmFixture, buildEsmFixture(importMap), "utf8");
-    await writeFile(cjsFixture, buildCjsFixture(importMap), "utf8");
+    await writeFile(esmFixture, buildEsmFixture(checkableMap), "utf8");
+    await writeFile(cjsFixture, buildCjsFixture(checkableMap), "utf8");
 
     const failures: Array<{ label: string; detail: string }> = [];
 
@@ -367,7 +448,7 @@ async function main() {
 
     console.log("━━━ EXPORT CHECK PASSED ━━━");
     console.log(
-      `All ${totalSymbols} symbol(s) across ${importMap.size} entry point(s) are present in both ESM and CJS.`,
+      `All ${totalSymbols} symbol(s) across ${checkableMap.size} entry point(s) are present in both ESM and CJS.`,
     );
   } finally {
     await rm(tmpDir, { force: true, recursive: true });
