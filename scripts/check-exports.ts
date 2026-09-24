@@ -104,22 +104,46 @@ const KNOWN_MISSING: ReadonlyMap<string, ReadonlySet<string>> = new Map([
       // Additional classes — not yet in v1.4.5
       "StealthClient",
       "StellarStealthSigner",
+      // Streaming types — not yet in v1.4.5
+      "AnnouncementsStreamOptions",
+      "AnnouncementStream",
+      "Announcement",
+      "RetentionConfig",
+      "ViewTagFilter",
+      "StreamCacheOptions",
+      "BackpressureOptions",
+      "StreamError",
     ]),
   ],
   [
     "@wraith-protocol/sdk/chains/stellar",
     new Set([
-      // Federation helper — not yet in v1.4.5
+      // Federation helper + types — not yet in v1.4.5
       "resolveStellarFederation",
+      "FederationRecord",
+      "FederationCache",
+      "FederationError",
+      "FederationErrorCode",
       // Soroban operation builder — not yet in v1.4.5
       "createAnnounceOperation",
-      // Stellar uses deriveStealthPrivateScalar, not deriveStealthPrivateKey
-      // The docs incorrectly reference the EVM name; tracked separately
+      // Stellar uses deriveStealthPrivateScalar; docs incorrectly use EVM name
       "deriveStealthPrivateKey",
     ]),
   ],
 ]);
 
+/**
+ * Specifiers to skip at CJS *runtime* only.
+ * tsc still validates their types via the CJS fixture — only tsx execution
+ * is skipped. Use this for packages whose transitive deps have broken
+ * ESM/CJS interop that crashes require() in a Node ESM context.
+ *
+ * @solana/web3.js → rpc-websockets ships a broken .cjs that fails to link
+ * when loaded via require() inside an ESM module job (Node ≥22).
+ */
+const CJS_RUNTIME_SKIP = new Set<string>([
+  "@wraith-protocol/sdk/chains/solana",
+]);
 
 type ImportEntry = {
   specifier: string;
@@ -289,11 +313,24 @@ function buildCjsFixture(importMap: ImportMap): string {
     if (values.length === 0) continue;
 
     const alias = nsAlias(i);
-    out.push(
-      `const ${alias} = require("${specifier}") as typeof import("${specifier}");`,
-    );
-    for (const v of values) {
-      out.push(`__check("${specifier}", "${v}", ${alias}.${v});`);
+
+    if (CJS_RUNTIME_SKIP.has(specifier)) {
+      // Type-check only: cast a dummy object so tsc validates the property
+      // names without actually calling require() at runtime.
+      out.push(
+        `// ${specifier}: CJS runtime skipped (broken transitive dep)`,
+      );
+      out.push(
+        `const ${alias} = {} as typeof import("${specifier}");`,
+      );
+      // No __check calls — we only care about compile-time validation here.
+    } else {
+      out.push(
+        `const ${alias} = require("${specifier}") as typeof import("${specifier}");`,
+      );
+      for (const v of values) {
+        out.push(`__check("${specifier}", "${v}", ${alias}.${v});`);
+      }
     }
     out.push("");
   }
