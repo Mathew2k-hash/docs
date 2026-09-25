@@ -11,6 +11,7 @@
     "check:stellar-reference": "tsx scripts/generate-stellar-reference.ts --check --allow-missing",
     "mint:validate": "mint validate",
     "mint:broken-links": "mint broken-links",
+    "check:links": "node scripts/check-links.mjs",
     "test": "npm run check:snippets && npm run check:nav-coverage && npm run check:exports"
   },
   "dependencies": {

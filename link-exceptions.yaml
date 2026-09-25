@@ -1,0 +1,30 @@
+# link-exceptions.yaml
+#
+# External URLs that the link checker should skip.
+# Add an entry here when a URL is structurally valid but returns 4xx/5xx in CI
+# because the host rate-limits crawlers, requires authentication, or is behind
+# a bot-protection layer (Cloudflare, etc.).
+#
+# Each entry MUST include:
+#   url     – exact URL or URL prefix to skip (string)
+#   reason  – why this exception exists
+#   owner   – GitHub handle of the person who added it
+#   added   – ISO date the exception was added
+#
+# Review and prune stale entries every quarter.
+
+exceptions:
+  - url: https://twitter.com
+    reason: Twitter/X returns 403 to all non-browser user-agents.
+    owner: "@maintainer"
+    added: "2026-09-25"
+
+  - url: https://x.com
+    reason: Same as twitter.com — bot-protection returns 403.
+    owner: "@maintainer"
+    added: "2026-09-25"
+
+  - url: https://www.linkedin.com
+    reason: LinkedIn blocks all crawler user-agents.
+    owner: "@maintainer"
+    added: "2026-09-25"
