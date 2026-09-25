@@ -56,13 +56,11 @@ function loadExceptions() {
   const raw = fs.readFileSync(EXCEPTIONS_FILE, "utf8");
   const urls = [];
   let inExceptions = false;
-  let currentUrl = null;
   for (const line of raw.split("\n")) {
     if (/^exceptions:/.test(line)) { inExceptions = true; continue; }
     if (!inExceptions) continue;
-    // New list item
     const urlMatch = line.match(/^\s+-\s+url:\s+"?([^"]+)"?\s*$/);
-    if (urlMatch) { currentUrl = urlMatch[1].trim(); urls.push(currentUrl); }
+    if (urlMatch) urls.push(urlMatch[1].trim());
   }
   return urls;
 }
@@ -71,6 +69,16 @@ const EXCEPTION_PREFIXES = loadExceptions();
 
 function isExcepted(url) {
   return EXCEPTION_PREFIXES.some((prefix) => url.startsWith(prefix));
+}
+
+/** Check whether an internal path (e.g. /reference/stellar-event-schemas) is excepted. */
+function isInternalExcepted(absPath) {
+  // Convert absolute disk path back to a root-relative path for matching
+  const rel = "/" + absPath.replace(/\\/g, "/").split(ROOT.replace(/\\/g, "/") + "/")[1];
+  return EXCEPTION_PREFIXES
+    .filter((p) => p.startsWith("internal:"))
+    .map((p) => p.slice("internal:".length))
+    .some((prefix) => rel.startsWith(prefix));
 }
 
 // ---------------------------------------------------------------------------
@@ -106,12 +114,15 @@ const HEADING_RE = /^#{1,6}\s+(.+)$/gm;
  */
 function headingToAnchor(heading) {
   return heading
-    .replace(/<[^>]+>/g, "")   // strip HTML/JSX tags
-    .replace(/`[^`]+`/g, (m) => m.slice(1, -1)) // strip backticks
+    .replace(/<[^>]+>/g, "")        // strip HTML/JSX tags
+    .replace(/`[^`]+`/g, (m) => m.slice(1, -1)) // strip backtick wrapping
+    .replace(/&amp;/g, "-")          // HTML entity &amp; → hyphen (GFM behaviour)
+    .replace(/&/g, "-")              // bare & → hyphen (GFM behaviour)
     .toLowerCase()
-    .replace(/[^\w\s-]/g, "")  // remove punctuation except hyphen
+    .replace(/[^\w\s-]/g, "")        // remove remaining punctuation except hyphen
     .trim()
-    .replace(/\s+/g, "-");
+    .replace(/\s+/g, "-")            // spaces → hyphens
+    .replace(/-{2,}/g, "-");         // collapse consecutive hyphens
 }
 
 function extractHeadings(content) {
@@ -152,7 +163,9 @@ function resolveInternal(href, fromFile) {
   if (/^mailto:/i.test(href)) return null;
   if (href.startsWith("#")) return { file: fromFile, anchor: href.slice(1) };
 
-  const [pathPart, anchor] = href.split("#");
+  // Strip query string before resolving — query params are not filesystem paths
+  const hrefNoQuery = href.split("?")[0];
+  const [pathPart, anchor] = hrefNoQuery.split("#");
 
   let resolved;
   if (pathPart.startsWith("/")) {
@@ -269,6 +282,7 @@ async function main() {
       const existingFile = await fileExists(resolved.file);
 
       if (!existingFile) {
+        if (isInternalExcepted(resolved.file)) continue; // known stub
         broken.push({ file: relFile, href, reason: "File not found" });
         continue;
       }
