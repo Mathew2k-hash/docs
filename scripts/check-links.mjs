@@ -167,14 +167,17 @@ function resolveInternal(href, fromFile) {
 
 async function fileExists(filePath) {
   const candidates = [
-    filePath,
     filePath + ".mdx",
     filePath + ".md",
     path.join(filePath, "index.mdx"),
     path.join(filePath, "index.md"),
+    filePath, // bare path last — only accepted if it's a file, not a dir
   ];
   for (const c of candidates) {
-    try { await stat(c); return c; } catch { /* continue */ }
+    try {
+      const s = await stat(c);
+      if (s.isFile()) return c;
+    } catch { /* continue */ }
   }
   return null;
 }
