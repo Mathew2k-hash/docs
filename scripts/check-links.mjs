@@ -113,6 +113,10 @@ const HEADING_RE = /^#{1,6}\s+(.+)$/gm;
  * Strips MDX/HTML tags, lowercases, replaces spaces with hyphens.
  */
 function headingToAnchor(heading) {
+  // 1. If a Mintlify/MDX explicit id is present — {#custom-id} — use it directly.
+  const explicitId = heading.match(/\{#([\w-]+)\}\s*$/);
+  if (explicitId) return explicitId[1];
+
   return heading
     .replace(/<[^>]+>/g, "")        // strip HTML/JSX tags
     .replace(/`[^`]+`/g, (m) => m.slice(1, -1)) // strip backtick wrapping

@@ -109,9 +109,24 @@ exceptions:
     owner: "@maintainer"
     added: "2026-09-25"
 
+  - url: internal:/guides/ops/monitoring-and-on-call
+    reason: >
+      monitoring-and-on-call.mdx is not yet authored in this branch.
+      Referenced by guides that will link to it once the page exists.
+    owner: "@maintainer"
+    added: "2026-09-25"
+
+  - url: internal:/guides/integrations/phoenix
+    reason: >
+      phoenix.mdx not yet present in this branch. Contains links to anchors
+      in sdk/chains/stellar and reference/auditor-guide that are valid once
+      the page is merged.
+    owner: "@maintainer"
+    added: "2026-09-25"
+
   - url: internal:/guides/my-guide
     reason: >
-      Placeholder link used in i18n.md documentation example.
-      Not a real page; intentional example.
+      Placeholder link used in docs/i18n.md as an illustrative example.
+      Not a real page; intentional.
     owner: "@maintainer"
     added: "2026-09-25"
