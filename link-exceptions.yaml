@@ -105,7 +105,10 @@ exceptions:
     added: "2026-09-25"
 
   - url: internal:/reference/error-codes
-    reason: Error codes reference page not yet written.
+    reason: >
+      Error codes reference page exists on the target branch but not in this
+      branch. All links to it (including anchors) are suppressed until the
+      page is merged here.
     owner: "@maintainer"
     added: "2026-09-25"
 

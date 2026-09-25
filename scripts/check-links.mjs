@@ -292,6 +292,7 @@ async function main() {
       }
 
       if (resolved.anchor) {
+        if (isInternalExcepted(resolved.file)) continue; // excepted file — skip anchor check too
         const headings = await getHeadings(existingFile);
         if (!headings.has(resolved.anchor)) {
           broken.push({
