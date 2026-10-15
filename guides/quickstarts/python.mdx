@@ -659,6 +659,9 @@ RECIPIENT_META_ADDRESS = (
     "45e84a059a47ee5d6fb721dcdbb31cecd928161e24b1e789e85d1e0510c99e86"  # spendingPubKey
     "d25639f6da0834e32d912626fd59d01e79a126ff10a59d034d2e46124e1ca791"  # viewingPubKey
 )
+# The recipient shares their meta-address — either directly or via a .wraith name.
+# For this quickstart we use a literal; in production resolve it from the names contract.
+RECIPIENT_META_ADDRESS = "st:xlm:<spending_hex><viewing_hex>"
 
 spending_pub, viewing_pub = decode_meta_address(RECIPIENT_META_ADDRESS)
 stealth = generate_stealth_address(spending_pub, viewing_pub)

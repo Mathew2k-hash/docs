@@ -7,6 +7,9 @@
     "light": "/assets/images/logo-black.png"
   },
   "favicon": "/assets/images/logo-black.png",
+  "redirects": [
+    { "source": "/README", "destination": "/introduction" }
+  ],
   "colors": {
     "primary": "#c6c6c7",
     "light": "#e6e1e5",
@@ -98,8 +101,12 @@
             "pages": [
               "reference/audits",
               "reference/auditor-guide",
+              "reference/contract-registry",
+              "reference/compatibility-matrix",
+              "reference/error-codes",
               "reference/security-disclosure",
               "reference/sep-compatibility",
+              "reference/stellar-event-schemas",
               "reference/stellar-networks",
               "reference/threat-model"
             ]
@@ -150,7 +157,9 @@
             "pages": [
               "guides/integrations/aquarius",
               "guides/integrations/blend",
+              "guides/integrations/fxdao",
               "guides/integrations/nuxt",
+              "guides/integrations/phoenix",
               "guides/integrations/react-native",
               "guides/integrations/reflector",
               "guides/integrations/soroswap"
@@ -170,11 +179,14 @@
               "guides/stellar-custom-assets",
               "guides/stellar/stellar-liquidity-pool-swap",
               "guides/stellar/stellar-path-payment",
+              "guides/stellar/sponsored-batch-send",
               "guides/stellar/passkey-signing",
               "guides/stellar/stellar-quickstart",
               "guides/stellar/wraith-names-lifecycle",
+              "guides/stellar/subscriptions-with-wraith-names",
               "guides/wraith-names-stellar",
-              "guides/ops/self-hosted-deployment"
+              "guides/ops/self-hosted-deployment",
+              "guides/ops/monitoring-and-on-call"
             ]
           }
         ]

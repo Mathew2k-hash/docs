@@ -100,7 +100,7 @@ Names:     CDDD...
 
 The deploy script automatically wires the contracts. Specifically, it calls:
 
-```bash
+```bash no-check
 soroban contract invoke \
     --id <SENDER_ID> \
     --source wraith-deployer \
@@ -117,7 +117,7 @@ contract IDs and is the canonical record of your deployment.
 
 Share this file with any consumer application. Its structure:
 
-```json
+```json no-check
 {
   "network": "futurenet",
   "contracts": {
@@ -141,3 +141,11 @@ You should see ledger entries confirming the deployment.
 
 **Your self‑hosted Wraith instance is now live.** You can register names,
 announce stealth meta‑addresses, and send private payments against these contracts.
+
+## Next Steps
+
+For production deployments, see the [Monitoring, Alerting, and On‑Call Runbook](/guides/ops/monitoring-and-on-call) to set up:
+- Grafana dashboards for RPC, indexer, and contract health
+- Prometheus alerting rules with severity thresholds
+- Incident response playbooks for common operational issues
+- Quarterly tabletop exercises to validate readiness
