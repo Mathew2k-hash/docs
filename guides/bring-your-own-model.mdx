@@ -10,7 +10,8 @@ By default, Wraith agents use a hosted Gemini model. You can replace it with Ope
 Pass the `ai` option when creating the `Wraith` client:
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({
   apiKey: "wraith_live_abc123",

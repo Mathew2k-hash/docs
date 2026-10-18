@@ -10,7 +10,8 @@ Stealth addresses provide strong privacy by default. But certain usage patterns 
 The Wraith agent includes a privacy check tool that scores your stealth address activity:
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: "wraith_..." });
 const agent = await wraith.createAgent({

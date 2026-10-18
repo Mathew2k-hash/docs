@@ -24,7 +24,8 @@ npm install @wraith-protocol/sdk
 ### Root Import — Agent Client
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 ```
 
 This is the managed platform client. It talks to Wraith's hosted TEE infrastructure over HTTP. Zero heavy dependencies — just `fetch` and TypeScript types. No crypto libraries, no database drivers, no native modules.
