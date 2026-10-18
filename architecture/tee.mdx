@@ -87,7 +87,8 @@ if (recoveredAddress !== body.wallet) {
 Exporting an agent's private key requires a fresh wallet signature:
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: "wraith_..." });
 const agent = await wraith.getAgentByName("alice");

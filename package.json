@@ -9,7 +9,8 @@
     "check:stellar-reference": "tsx scripts/generate-stellar-reference.ts --check --allow-missing",
     "mint:validate": "mint validate",
     "mint:broken-links": "mint broken-links",
-    "test": "npm run check:snippets"
+    "test": "npm run check:snippets && npm run check:exports",
+    "check:exports": "tsx scripts/check-exports.ts"
   },
   "dependencies": {
     "@solana/web3.js": "^1.95.0",

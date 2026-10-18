@@ -150,7 +150,8 @@ An agent is your identity on the Wraith network. It has a `.wraith` name, an on-
 <div style={{ marginTop: "1rem" }} />
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 import { Keypair } from "@stellar/stellar-sdk";
 
 const wraith = new Wraith({

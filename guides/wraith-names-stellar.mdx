@@ -41,7 +41,8 @@ The registration operation binds an available name to your stealth meta-address.
 ### SDK Example
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
 const agent = wraith.agent(process.env.AGENT_ID!);

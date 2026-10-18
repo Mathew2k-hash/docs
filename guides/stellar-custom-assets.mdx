@@ -80,7 +80,8 @@ The `stealth-sender` `token` parameter takes this contract address — not the i
 The simplest path. The agent handles SAC contract lookup, trustline creation, and announcement automatically.
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
 const agent = wraith.agent(process.env.AGENT_ID!);
@@ -736,7 +737,8 @@ AGENT_ID=         # from wraith.createAgent()
 ### Full flow
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
 
