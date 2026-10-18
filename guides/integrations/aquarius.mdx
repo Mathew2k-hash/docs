@@ -176,7 +176,8 @@ async function watchRewards(intervalMs = 30_000) {
 Instead of claiming to your LP account, derive a one-time stealth address from your Wraith meta-address. AQUA lands there, invisible to observers.
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 import { deriveStealthKeys, STEALTH_SIGNING_MESSAGE } from "@wraith-protocol/sdk/chains/stellar";
 import { signMessage } from "@stellar/freighter-api";
 
@@ -285,7 +286,8 @@ The claimed AQUA lands at the stealth address. Your LP position is untouched and
 If you use the Wraith managed agent, the agent can handle stealth address generation, funding, and claiming in one command:
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
 const agent = wraith.agent(process.env.AGENT_ID!);
@@ -405,7 +407,7 @@ The complete end-to-end flow in a single file:
 ```typescript
 import { Keypair, Networks, TransactionBuilder, Operation, Asset, BASE_FEE } from "@stellar/stellar-sdk";
 import { AquariusClient, Asset as AqAsset, XLM } from "@aquariusdefi/sdk";
-import { Wraith } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 import { deriveStealthKeys, generateStealthAddress, deriveStealthPrivateKey, STEALTH_SIGNING_MESSAGE } from "@wraith-protocol/sdk/chains/stellar";
 import { Server } from "@stellar/stellar-sdk/horizon";
 

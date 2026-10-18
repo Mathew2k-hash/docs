@@ -104,7 +104,7 @@ async function main() {
       "utf8",
     );
 
-    const result = await run("pnpm", ["exec", "tsc", "--noEmit", "--project", compilerConfig]);
+    const result = await run(path.join(repoRoot, "node_modules", ".bin", "tsc"), ["--noEmit", "--project", compilerConfig]);
     if (result.exitCode !== 0) {
       failures.push(appendSourceMap(result.output.trim(), checkable));
     }

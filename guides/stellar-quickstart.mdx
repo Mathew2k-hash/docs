@@ -27,7 +27,8 @@ npm install @wraith-protocol/sdk @stellar/stellar-sdk
 ## Step 2 — Initialize the client
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({
   apiKey: process.env.WRAITH_API_KEY!,
@@ -53,7 +54,8 @@ Keep the secret in an environment variable (`STELLAR_SECRET`). Do **not** commit
 ## Step 4 — Create your agent
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 import { Keypair } from "@stellar/stellar-sdk";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });

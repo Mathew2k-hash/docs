@@ -78,7 +78,8 @@ In addition to the registration fee, the transaction pays standard Soroban resou
 ### SDK Example
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
 
@@ -155,7 +156,8 @@ Renewal extends `expiry_ledger` by one year's worth of ledgers. The renewal fee 
 #### SDK Example
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
 const agent = wraith.agent(process.env.AGENT_ID!);
@@ -210,7 +212,8 @@ You can watch for this event using the Stellar RPC `getEvents` endpoint or via [
 ### SDK Example
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
 const agent = wraith.agent(process.env.AGENT_ID!);
@@ -247,7 +250,8 @@ Forward resolution returns the 64-byte stealth meta-address currently registered
 ### SDK Example
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
 
@@ -280,7 +284,8 @@ Reverse lookup maps a 64-byte stealth meta-address back to its registered `.wrai
 ### SDK Example
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
 
@@ -316,7 +321,8 @@ If you rotate your stealth keys or want to point a name at a different agent, ca
 ### SDK Example
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
 const agent = wraith.agent(process.env.AGENT_ID!);
@@ -391,7 +397,8 @@ After the grace period ends, the name is immediately open for re-registration by
 #### Checking Expiry Status
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
 

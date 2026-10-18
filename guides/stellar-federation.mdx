@@ -272,7 +272,8 @@ if (record.accountId.startsWith("st:xlm:")) {
 ### With the managed agent
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 import { resolveStellarFederation } from "@wraith-protocol/sdk/chains/stellar";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
@@ -640,7 +641,8 @@ To accept private payments via federation, configure your federation server to r
 ### 1. Get your agent's stealth meta-address
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
 const agent = await wraith.getAgentByName("payments");

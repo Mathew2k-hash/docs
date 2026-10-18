@@ -323,7 +323,8 @@ The Wraith demo includes `StellarPaymentLink.tsx` — a React component that gen
 ```tsx
 import React, { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 interface StellarPaymentLinkProps {
   to: string;          // .wraith name
@@ -441,7 +442,7 @@ Instead of polling from the client, register a webhook with Wraith to receive a 
 ### Registering a webhook (Wraith API)
 
 ```typescript
-import { Wraith } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
 

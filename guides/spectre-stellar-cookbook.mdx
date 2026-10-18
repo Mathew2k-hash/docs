@@ -24,7 +24,8 @@ A SaaS product that receives USDC payments on Stellar, webhooks on every incomin
 ### Step 1 — Create the agent
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 import { Keypair } from "@stellar/stellar-sdk";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
@@ -194,7 +195,8 @@ Schedule this with your platform's cron (AWS EventBridge, GitHub Actions, Vercel
 
 ```typescript
 // weekly-withdraw.ts
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 export async function weeklyWithdraw() {
   const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
@@ -268,7 +270,8 @@ export async function privacyAutopilot(agentId: string) {
 
 ```typescript
 // agent-setup.ts
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 import cron from "node-cron";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
@@ -300,7 +303,8 @@ A DAO pays contributors weekly in USDC via `.wraith` stealth addresses on Stella
 ### Step 1 — Create the payroll agent
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 import { Keypair } from "@stellar/stellar-sdk";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
@@ -362,7 +366,7 @@ export const contributors: Contributor[] = [
 
 ```typescript
 // payroll-run.ts
-import { Wraith } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 import { contributors } from "./payroll-registry";
 
 interface PayrollResult {
@@ -599,7 +603,8 @@ A weekly background agent that analyzes stealth payment patterns, sends Slack/em
 ### Step 1 — Create the monitoring agent
 
 ```typescript
-import { Wraith, Chain } from "@wraith-protocol/sdk";
+import { Chain } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 import { Keypair } from "@stellar/stellar-sdk";
 
 const wraith = new Wraith({ apiKey: process.env.WRAITH_API_KEY! });
@@ -638,7 +643,7 @@ curl -X POST https://api.usewraith.xyz/agent/create \
 
 ```tsx
 // privacy-analysis.ts
-import { Wraith } from "@wraith-protocol/sdk";
+import { Wraith } from "@wraith-protocol/sdk-agent";
 
 export interface PrivacyReport {
   agentId: string;
