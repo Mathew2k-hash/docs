@@ -90,7 +90,7 @@
           },
           {
             "group": "Contracts",
-            "pages": ["contracts/evm", "contracts/stellar", "contracts/solana", "contracts/ckb", "reference/stellar-event-schemas"]
+            "pages": ["contracts/manifest", "contracts/evm", "contracts/stellar", "contracts/solana", "contracts/ckb", "reference/stellar-event-schemas"]
           },
           {
             "group": "Reference",

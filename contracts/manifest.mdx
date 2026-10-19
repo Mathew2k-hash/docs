@@ -1,0 +1,199 @@
+---
+title: "Contracts Manifest"
+description: "Machine-readable contract registry — how to consume contracts/manifest.json from SDKs, indexers, and operators"
+keywords: "manifest, contract registry, machine-readable, SDK, indexer, operator, network selection"
+---
+
+# Contracts Manifest
+
+`contracts/manifest.json` is the single source of truth for Wraith contract deployments and network configuration. Docs pages must not duplicate contract addresses; they reference this manifest instead.
+
+This page explains how SDKs, indexers, and operators consume the manifest, including how to handle `null`, `external`, `pending`, and `immutable` fields.
+
+## Manifest structure
+
+Top-level shape:
+
+```json
+{
+  "$schema": "https://wraith-protocol.org/schemas/contract-manifest/v1.json",
+  "manifestVersion": "1.0.0",
+  "generatedAt": "2026-10-19T08:58:49Z",
+  "source": "wraith-protocol/contracts",
+  "fieldTypes": { ... },
+  "networks": [ ... ]
+}
+```
+
+### `fieldTypes`
+
+Defines the four field type annotations used across network records:
+
+| Type | Meaning |
+|---|---|
+| `immutable` | Never changes after the record is created. Safe to hard-code. |
+| `external` | Owned by a third party (SDF, RPC provider, subgraph host). Wraith does not control it. |
+| `pending` | Not yet deployed or determined. Do not use in production. |
+| `null` | Absent or not applicable for this network. Treat as `undefined`. |
+
+### `networks[]`
+
+Each entry describes one chain/network combination:
+
+```json
+{
+  "chain": "stellar",
+  "network": "testnet",
+  "displayName": "Stellar Testnet",
+  "purpose": "Development and integration testing",
+  "status": "live",
+  "realValue": false,
+  "resetCadence": "~quarterly — SDF-operated reset wipes all accounts, balances, and contract state",
+  "trustBoundary": { "operator": "...", "control": "...", "immutable": [...], "external": [...], "warning": "..." },
+  "provenance": { "source": "...", "verifiedAt": "2026-07-29", "method": "..." },
+  "connection": {
+    "networkPassphrase": { "value": "...", "immutable": true },
+    "horizonUrl": { "value": "...", "immutable": true, "external": true },
+    "sorobanUrl": { "value": "...", "immutable": true, "external": true },
+    "friendbotUrl": { "value": "...", "immutable": true, "external": true }
+  },
+  "contracts": {
+    "stealth-announcer": { "address": "...", "version": "v2", "status": "live", "immutable": false },
+    "stealth-registry": { "address": null, "version": "v1", "status": "pending", "note": "..." },
+    "stealth-sender": { "address": null, "version": "v1", "status": "pending", "note": "..." },
+    "wraith-names": { "address": "...", "version": "v1", "status": "live", "immutable": false }
+  }
+}
+```
+
+## Consuming from the SDK
+
+The SDK's `getDeployment(chain)` reads the manifest and returns the deployment record for a chain:
+
+```typescript
+import { getDeployment, DEPLOYMENTS } from "@wraith-protocol/sdk/chains/stellar";
+
+// Read a single network
+const deployment = getDeployment("stellar");
+// {
+//   network: "testnet",
+//   networkPassphrase: "Test SDF Network ; September 2015",
+//   horizonUrl: "https://horizon-testnet.stellar.org",
+//   sorobanUrl: "https://soroban-testnet.stellar.org",
+//   contracts: {
+//     announcer: "CCJLJ2QRBJAAKIG6ELNQVXLLWMKKWVN5O2FKWUETHZGMPAD4MHK7WVWL",
+//     names: "CDEMB3MAE62ZOCCKZPTYSXR5CS5WVENPOU5MDVK4PNKTZXFVDC74AFBV",
+//   },
+// }
+
+// List every network the SDK knows about
+console.log(Object.keys(DEPLOYMENTS)); // ["stellar"]
+```
+
+> `getDeployment` returns the record for the SDK's active version. For the full manifest including `null`, `external`, `pending`, and `immutable` annotations, fetch `contracts/manifest.json` directly.
+
+## Consuming from an indexer
+
+An indexer reads the announcer contract address from the manifest and scans Soroban RPC events:
+
+```typescript
+import { getDeployment } from "@wraith-protocol/sdk/chains/stellar";
+import { Server } from "@stellar/stellar-sdk/rpc";
+
+async function buildIndexer(network: string) {
+  const deployment = getDeployment(network);
+  const announcerId = deployment.contracts?.announcer?.address;
+
+  if (!announcerId) {
+    throw new Error(`No announcer contract on ${network}; nothing to index.`);
+  }
+
+  const rpc = new Server(deployment.sorobanUrl);
+
+  return rpc.getEvents({
+    startLedger: lastProcessedLedger,
+    filters: [{
+      type: "contract",
+      contractIds: [announcerId],
+      topics: [["announce"]],
+    }],
+  });
+}
+```
+
+Skip networks where `contracts.announcer.address` is `null`. Respect RPC retention windows (~17,280 ledgers ≈ 24 hours on public RPC).
+
+## Consuming from an operator (Spectre TEE)
+
+An operator on mainnet configures:
+
+```bash
+# Contract IDs are resolved from contracts/manifest.json at runtime — not hard-coded
+STELLAR_NETWORK=mainnet
+STELLAR_NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
+STELLAR_HORIZON_URL=https://horizon.stellar.org
+STELLAR_RPC_URL_PRIMARY=https://mainnet.stellar.validationcloud.io/v1/<API_KEY>
+STELLAR_RPC_URL_FALLBACK=https://<slug>.stellar-mainnet.quiknode.pro/<API_KEY>
+```
+
+The admin key (contract upgrade authority) is held in cold storage / multisig and is outside the application's trust boundary.
+
+## Field type handling
+
+| Type | Example | Code handling |
+|---|---|---|
+| `immutable` | `networkPassphrase` | Safe to hard-code or cache indefinitely. |
+| `external` | `sorobanUrl` on mainnet | Read at runtime; design for RPC failover. |
+| `pending` | Mainnet contract addresses | Reject in production; track readiness in `contracts/stellar/MAINNET_READINESS.md`. |
+| `null` | `friendbotUrl` on mainnet | Treat as `undefined`; branch on presence before use. |
+
+```typescript
+import { getDeployment } from "@wraith-protocol/sdk/chains/stellar";
+
+const deployment = getDeployment("stellar");
+
+// immutable — safe to hard-code
+const passphrase = deployment.networkPassphrase;
+
+// external — read at runtime, plan for failover
+const rpcUrl = deployment.sorobanUrl;
+if (!rpcUrl) {
+  throw new Error("sorobanUrl is null/external — configure an RPC provider before connecting.");
+}
+
+// pending — absent until deployment
+const announcer = deployment.contracts.announcer;
+if (!announcer.address || announcer.status === "pending") {
+  throw new Error("Announcer not deployed on this network.");
+}
+
+// null — not applicable on this network
+const friendbot = deployment.friendbotUrl; // null on mainnet
+if (friendbot) {
+  await fetch(friendbot.replace("<G_ADDRESS>", address));
+}
+```
+
+## Updating the manifest
+
+The manifest is maintained in the contracts repository (`wraith-protocol/contracts`). When a contract is deployed, upgraded, or a network is added:
+
+1. Add or update the network record in `contracts/manifest.json`.
+2. Set `provenance.verifiedAt` to the verification date and `provenance.method` to how it was verified.
+3. Re-generate any derived docs from the manifest — do not edit contract addresses by hand in markdown.
+
+Re-deploying your application does **not** refresh contract addresses. Read the manifest at runtime (or at build time via a CI step) so upgrades are picked up without a redeploy.
+
+## Related resources
+
+<CardGroup cols={2}>
+  <Card title="Stellar Networks" href="/reference/stellar-networks" icon="network-wired">
+    Network selection, provenance, trust boundaries, and update cadence for Stellar testnet, Futurenet, and mainnet
+  </Card>
+  <Card title="Stellar Contracts Reference" href="/contracts/stellar" icon="file-code">
+    Full interface specs for stealth-announcer, stealth-registry, stealth-sender, and wraith-names
+  </Card>
+  <Card title="Stellar Mainnet Deployment" href="/guides/stellar-mainnet-deployment" icon="server">
+    Operator guide: RPC providers, monitoring, upgrade governance, incident runbooks
+  </Card>
+</CardGroup>

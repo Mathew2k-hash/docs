@@ -1,0 +1,147 @@
+{
+  "$schema": "https://wraith-protocol.org/schemas/contract-manifest/v1.json",
+  "manifestVersion": "1.0.0",
+  "generatedAt": "2026-10-19T08:58:49Z",
+  "source": "wraith-protocol/contracts",
+  "description": "Machine-readable registry of Wraith contract deployments and network configuration. This is the single source of truth for contract addresses, RPC endpoints, and network metadata. Docs pages must not duplicate contract addresses; they reference this manifest instead.",
+  "fieldTypes": {
+    "immutable": "Value never changes after the network record is created (e.g. network passphrase). Safe to hard-code.",
+    "external": "Value is owned and operated by a third party (SDF, an RPC provider, a subgraph host). Wraith does not control it and it can change without notice.",
+    "pending": "Value is not yet deployed or determined. Do not use in production. Track readiness in contracts/stellar/MAINNET_READINESS.md.",
+    "null": "Field is absent or not applicable for this network (e.g. Friendbot on mainnet, Horizon on Futurenet). Treat as undefined in code."
+  },
+  "networks": [
+    {
+      "chain": "stellar",
+      "network": "testnet",
+      "displayName": "Stellar Testnet",
+      "purpose": "Development and integration testing",
+      "status": "live",
+      "realValue": false,
+      "resetCadence": "~quarterly — SDF-operated reset wipes all accounts, balances, and contract state",
+      "trustBoundary": {
+        "operator": "Stellar Development Foundation (SDF)",
+        "control": "SDF operates Horizon, Soroban RPC, and Friendbot. Testnet resets are initiated by SDF without Wraith involvement.",
+        "immutable": ["networkPassphrase"],
+        "external": ["horizonUrl", "sorobanUrl", "friendbotUrl"],
+        "warning": "Do not hold real value. All state is wiped on reset."
+      },
+      "provenance": {
+        "source": "@wraith-protocol/sdk/chains/stellar getDeployment(\"stellar\")",
+        "verifiedAt": "2026-07-29",
+        "method": "On-chain contract inspection via Soroban RPC, cross-checked against SDK TypeScript bindings"
+      },
+      "connection": {
+        "networkPassphrase": { "value": "Test SDF Network ; September 2015", "immutable": true },
+        "horizonUrl": { "value": "https://horizon-testnet.stellar.org", "immutable": true, "external": true },
+        "sorobanUrl": { "value": "https://soroban-testnet.stellar.org", "immutable": true, "external": true },
+        "friendbotUrl": { "value": "https://friendbot.stellar.org?addr=<G_ADDRESS>", "immutable": true, "external": true }
+      },
+      "contracts": {
+        "stealth-announcer": { "address": "CCJLJ2QRBJAAKIG6ELNQVXLLWMKKWVN5O2FKWUETHZGMPAD4MHK7WVWL", "version": "v2", "status": "live", "immutable": false },
+        "stealth-registry": { "address": null, "version": "v1", "status": "pending", "note": "Pending deployment" },
+        "stealth-sender": { "address": null, "version": "v1", "status": "pending", "note": "Pending deployment" },
+        "wraith-names": { "address": "CDEMB3MAE62ZOCCKZPTYSXR5CS5WVENPOU5MDVK4PNKTZXFVDC74AFBV", "version": "v1", "status": "live", "immutable": false }
+      }
+    },
+    {
+      "chain": "stellar",
+      "network": "futurenet",
+      "displayName": "Stellar Futurenet",
+      "purpose": "Experimental Soroban preview features",
+      "status": "notDeployed",
+      "realValue": false,
+      "resetCadence": "On demand, without notice",
+      "trustBoundary": {
+        "operator": "Stellar Development Foundation (SDF)",
+        "control": "SDF operates RPC and Friendbot. Resets can occur at any time and run non-production protocol versions.",
+        "immutable": ["networkPassphrase"],
+        "external": ["sorobanUrl", "friendbotUrl"],
+        "warning": "Do not use for integration testing. State can be wiped at any time."
+      },
+      "provenance": {
+        "source": "@wraith-protocol/sdk/chains/stellar getDeployment(\"stellar\")",
+        "verifiedAt": "2026-07-29",
+        "method": "SDK deployment metadata; no Wraith contracts deployed"
+      },
+      "connection": {
+        "networkPassphrase": { "value": "Test SDF Future Network ; October 2022", "immutable": true },
+        "horizonUrl": { "value": null, "null": true, "note": "Horizon not available on Futurenet" },
+        "sorobanUrl": { "value": "https://rpc-futurenet.stellar.org", "immutable": true, "external": true },
+        "friendbotUrl": { "value": "https://friendbot-futurenet.stellar.org?addr=<G_ADDRESS>", "immutable": true, "external": true }
+      },
+      "contracts": {
+        "stealth-announcer": { "address": null, "version": "v2", "status": "notDeployed", "note": "Wraith contracts are not deployed on Futurenet" },
+        "stealth-registry": { "address": null, "version": "v1", "status": "notDeployed", "note": "Wraith contracts are not deployed on Futurenet" },
+        "stealth-sender": { "address": null, "version": "v1", "status": "notDeployed", "note": "Wraith contracts are not deployed on Futurenet" },
+        "wraith-names": { "address": null, "version": "v1", "status": "notDeployed", "note": "Wraith contracts are not deployed on Futurenet" }
+      }
+    },
+    {
+      "chain": "stellar",
+      "network": "mainnet",
+      "displayName": "Stellar Mainnet",
+      "purpose": "Production",
+      "status": "pending",
+      "realValue": true,
+      "resetCadence": "Never — public network, no resets",
+      "trustBoundary": {
+        "operator": "Wraith (mainnet deployment) + independent Soroban RPC providers",
+        "control": "Contract admin keys govern upgrades; RPC endpoints are provider-operated and external to Wraith.",
+        "immutable": ["networkPassphrase", "horizonUrl"],
+        "external": ["sorobanUrl"],
+        "warning": "All mainnet contract addresses are pending. Do not use placeholder values in production."
+      },
+      "provenance": {
+        "source": "wraith-protocol/contracts mainnet deployment (pending)",
+        "verifiedAt": null,
+        "method": "To be verified on mainnet launch; addresses published here and in contracts/stellar/MAINNET_READINESS.md"
+      },
+      "connection": {
+        "networkPassphrase": { "value": "Public Global Stellar Network ; September 2015", "immutable": true },
+        "horizonUrl": { "value": "https://horizon.stellar.org", "immutable": true },
+        "sorobanUrl": { "value": null, "external": true, "note": "Provider-dependent — no SDF-operated public Soroban RPC for mainnet. Choose a provider." },
+        "friendbotUrl": { "value": null, "null": true, "note": "Friendbot not available on mainnet" }
+      },
+      "contracts": {
+        "stealth-announcer": { "address": null, "version": "v2", "status": "pending", "note": "Pending mainnet launch" },
+        "stealth-registry": { "address": null, "version": "v1", "status": "pending", "note": "Pending mainnet launch" },
+        "stealth-sender": { "address": null, "version": "v1", "status": "pending", "note": "Pending mainnet launch" },
+        "wraith-names": { "address": null, "version": "v1", "status": "pending", "note": "Pending mainnet launch" }
+      }
+    },
+    {
+      "chain": "evm",
+      "network": "horizen-testnet",
+      "displayName": "Horizen Testnet",
+      "purpose": "EVM reference deployment",
+      "status": "live",
+      "realValue": false,
+      "chainId": 2651420,
+      "resetCadence": "None — persistent testnet",
+      "trustBoundary": {
+        "operator": "Wraith + Caldera (RPC host)",
+        "control": "Wraith owns the contracts; Caldera hosts the RPC node. Subgraph (Goldsky) is external.",
+        "immutable": ["chainId"],
+        "external": ["rpcUrl", "subgraphUrl", "explorerUrl"],
+        "warning": "Testnet only. Do not hold real value."
+      },
+      "provenance": {
+        "source": "@wraith-protocol/sdk/chains/evm getDeployment(\"horizen\")",
+        "verifiedAt": "2026-07-29",
+        "method": "On-chain contract inspection via EVM RPC, cross-checked against SDK TypeScript bindings"
+      },
+      "connection": {
+        "rpcUrl": { "value": "https://horizen-testnet.rpc.caldera.xyz/http", "immutable": true, "external": true },
+        "subgraphUrl": { "value": "https://api.goldsky.com/api/public/...", "external": true, "note": "Goldsky subgraph indexing Announcement events" },
+        "explorerUrl": { "value": "https://horizen-testnet.explorer.caldera.xyz", "immutable": true, "external": true }
+      },
+      "contracts": {
+        "announcer": { "address": "0x8AE65c05E7eb48B9bA652781Bc0a3DBA09A484F3", "version": "v2", "status": "live", "immutable": false },
+        "registry": { "address": "0x953E6cEdcdfAe321796e7637d33653F6Ce05c527", "version": "v1", "status": "live", "immutable": false },
+        "sender": { "address": "0x226C5eb4e139D9fa01cc09eA318638b090b12095", "version": "v1", "status": "live", "immutable": false },
+        "names": { "address": "0x3d46f709a99A3910f52bD292211Eb5D557F882D6", "version": "v1", "status": "live", "immutable": false }
+      }
+    }
+  ]
+}
