@@ -1,41 +1,43 @@
 ---
 title: "Stellar Networks"
-description: "Passphrase, RPC endpoints, Friendbot, reset cadence, and Wraith contract IDs for every Stellar network"
-keywords: "Stellar, testnet, mainnet, futurenet, soroban, passphrase, RPC, friendbot, contract IDs, network"
+description: "Network selection, contract registry, provenance, trust boundaries, and update cadence for Stellar testnet, Futurenet, and mainnet"
+keywords: "Stellar, testnet, mainnet, futurenet, soroban, passphrase, RPC, friendbot, contract IDs, network, manifest, provenance, trust boundary"
 ---
 
-Quick reference for every Stellar network supported by Wraith Protocol — what each one is for, how to connect to it, and which contract addresses to use.
+# Stellar Networks
+
+Passphrases, RPC endpoints, Friendbot, contract addresses, and update cadence for every Stellar network supported by Wraith Protocol.
+
+The canonical, machine-readable source of truth is the [contracts manifest](/contracts/manifest) (`contracts/manifest.json`) in the contracts repository. This page explains how to read it, which fields you can trust, how often records change, and how SDKs, indexers, and operators select a network safely. Contract addresses are **not** maintained here — they are read from the manifest.
 
 ## Network overview
 
-| Network | Purpose | Wraith contracts | Friendbot |
-|---|---|---|---|
-| [Testnet](#testnet) | Development and integration testing | Live | ✓ |
-| [Futurenet](#futurenet) | Experimental Soroban preview features | Not deployed | ✓ |
-| [Mainnet](#mainnet) | Production | Pending mainnet launch | ✗ |
+| Network | Purpose | Status | Real value | Reset cadence | Wraith contracts |
+|---|---|---|---|---|---|
+| [Testnet](#testnet) | Development and integration testing | Live | No | ~quarterly (SDF reset) | Live |
+| [Futurenet](#futurenet) | Experimental Soroban preview | Not deployed | No | On demand, without notice | Not deployed |
+| [Mainnet](#mainnet) | Production | Pending | Yes | Never | Pending |
+
+All values in the tables below are sourced from `contracts/manifest.json`. Do not copy addresses into your own config — read them from the manifest at runtime.
 
 ---
 
 ## Testnet
 
-The SDF-operated Stellar testnet. This is where Wraith contracts are deployed today
-and where you should build and test integrations.
+The SDF-operated Stellar testnet. This is where Wraith contracts are deployed today and where you should build and test integrations.
 
 <Warning>
-  The testnet is reset **approximately every quarter**. All accounts, balances, and
-  contract state are wiped on reset. Watch
-  [status.stellar.org](https://status.stellar.org) and the `#stellar-dev`
-  channel for reset announcements.
+  The testnet is reset **approximately every quarter**. All accounts, balances, and contract state are wiped on reset. Watch [status.stellar.org](https://status.stellar.org) and the `#stellar-dev` channel for reset announcements.
 </Warning>
 
 ### Connection details
 
-| Property | Value |
-|---|---|
-| Network passphrase | `Test SDF Network ; September 2015` |
-| Horizon URL | `https://horizon-testnet.stellar.org` |
-| Soroban RPC URL | `https://soroban-testnet.stellar.org` |
-| Friendbot URL | `https://friendbot.stellar.org?addr=<G_ADDRESS>` |
+| Property | Value | Field type |
+|---|---|---|
+| Network passphrase | `Test SDF Network ; September 2015` | immutable |
+| Horizon URL | `https://horizon-testnet.stellar.org` | immutable, external |
+| Soroban RPC URL | `https://soroban-testnet.stellar.org` | immutable, external |
+| Friendbot URL | `https://friendbot.stellar.org?addr=<G_ADDRESS>` | immutable, external |
 
 ### Friendbot — fund a testnet account
 
@@ -59,23 +61,18 @@ await fetch(`https://friendbot.stellar.org?addr=${keypair.publicKey()}`);
   accounts yourself with real XLM.
 </Note>
 
-### Wraith contract IDs
+### Contract addresses
 
-<!-- Last verified: 2026-07-29. Re-run `npm run generate:stellar-reference` to refresh from bindings. -->
+Contract addresses live in `contracts/manifest.json` under `networks[].contracts`. On testnet:
 
-| Contract | Testnet address | Version |
-|---|---|---|
-| `stealth-announcer` | `CCJLJ2QRBJAAKIG6ELNQVXLLWMKKWVN5O2FKWUETHZGMPAD4MHK7WVWL` | v2 |
-| `stealth-registry` | `CPLACEHOLDER_REGISTRY_TESTNET` | v1 |
-| `stealth-sender` | `CPLACEHOLDER_SENDER_TESTNET` | v1 |
-| `wraith-names` | `CDEMB3MAE62ZOCCKZPTYSXR5CS5WVENPOU5MDVK4PNKTZXFVDC74AFBV` | v1 |
+| Contract | Address | Version | Status |
+|---|---|---|---|
+| `stealth-announcer` | `CCJLJ2QRBJAAKIG6ELNQVXLLWMKKWVN5O2FKWUETHZGMPAD4MHK7WVWL` | v2 | Live |
+| `stealth-registry` | — | v1 | Pending |
+| `stealth-sender` | — | v1 | Pending |
+| `wraith-names` | `CDEMB3MAE62ZOCCKZPTYSXR5CS5WVENPOU5MDVK4PNKTZXFVDC74AFBV` | v1 | Live |
 
-<Note>
-  `stealth-registry` and `stealth-sender` addresses are pending deployment.
-  Track progress in `contracts/stellar/MAINNET_READINESS.md` in the contracts repo.
-  The `stealth-announcer` and `wraith-names` addresses above are live and sourced
-  from `getDeployment("stellar")` in the SDK.
-</Note>
+`stealth-registry` and `stealth-sender` addresses are pending deployment. Track progress in `contracts/stellar/MAINNET_READINESS.md` in the contracts repo. The `stealth-announcer` and `wraith-names` addresses above are live and sourced from `getDeployment("stellar")` in the SDK.
 
 ### Connecting with the SDK
 
@@ -119,9 +116,7 @@ STELLAR_NAMES_CONTRACT_ID=CDEMB3MAE62ZOCCKZPTYSXR5CS5WVENPOU5MDVK4PNKTZXFVDC74AF
 
 ## Futurenet
 
-The SDF's preview network for upcoming Soroban features. **Wraith contracts are not
-deployed on Futurenet.** Use it only if you are building against unreleased Soroban
-capabilities or testing SDK changes that require a bleeding-edge node.
+The SDF's preview network for upcoming Soroban features. **Wraith contracts are not deployed on Futurenet.** Use it only if you are building against unreleased Soroban capabilities or testing SDK changes that require a bleeding-edge node.
 
 <Warning>
   Futurenet can reset at any time without notice and runs protocol versions that
@@ -130,11 +125,14 @@ capabilities or testing SDK changes that require a bleeding-edge node.
 
 ### Connection details
 
-| Property | Value |
-|---|---|
-| Network passphrase | `Test SDF Future Network ; October 2022` |
-| Soroban RPC URL | `https://rpc-futurenet.stellar.org` |
-| Friendbot URL | `https://friendbot-futurenet.stellar.org?addr=<G_ADDRESS>` |
+| Property | Value | Field type |
+|---|---|---|
+| Network passphrase | `Test SDF Future Network ; October 2022` | immutable |
+| Horizon URL | — | null (not available) |
+| Soroban RPC URL | `https://rpc-futurenet.stellar.org` | immutable, external |
+| Friendbot URL | `https://friendbot-futurenet.stellar.org?addr=<G_ADDRESS>` | immutable, external |
+
+Horizon is `null` on Futurenet — there is no Horizon endpoint. Treat the field as undefined in code.
 
 ### Connecting with the SDK
 
@@ -150,35 +148,36 @@ const soroban = new Server(FUTURENET_RPC);
 
 <Note>
   `getDeployment("futurenet")` returns RPC and passphrase details but no Wraith
-  contract addresses, because contracts are not deployed there.
+  contract addresses, because contracts are not deployed there. All contract
+  fields are `null` with status `notDeployed`.
 </Note>
 
 ---
 
 ## Mainnet
 
-The Stellar public network. **Wraith contracts are not yet deployed on mainnet.**
-Contract addresses will be published here and in `contracts/stellar/MAINNET_READINESS.md`
-once the mainnet deployment is complete.
+The Stellar public network. **Wraith contracts are not yet deployed on mainnet.** Contract addresses will be published in `contracts/manifest.json` and in `contracts/stellar/MAINNET_READINESS.md` once the mainnet deployment is complete.
 
 <Warning>
-  All contract addresses below are **placeholder values** (`CPLACEHOLDER…`).
-  Do not use these in production. Subscribe to the `#announcements` channel for
-  the mainnet launch notification.
+  All mainnet contract addresses are pending. Do not use placeholder values in
+  production. Subscribe to the `#announcements` channel for the mainnet launch
+  notification.
 </Warning>
 
 ### Connection details
 
-| Property | Value |
-|---|---|
-| Network passphrase | `Public Global Stellar Network ; September 2015` |
-| Horizon URL | `https://horizon.stellar.org` |
-| Soroban RPC | Provider-dependent (see below) |
-| Friendbot | Not available |
+| Property | Value | Field type |
+|---|---|---|
+| Network passphrase | `Public Global Stellar Network ; September 2015` | immutable |
+| Horizon URL | `https://horizon.stellar.org` | immutable |
+| Soroban RPC | Provider-dependent | external, null until you choose a provider |
+| Friendbot | Not available | null |
+
+The SDF does not operate a public Soroban RPC endpoint for mainnet. `sorobanUrl` is `null` in the manifest until you select a provider — it is an `external` field owned by the RPC provider, not by Wraith.
 
 ### Soroban RPC providers for mainnet
 
-The SDF does not operate a public Soroban RPC endpoint for mainnet. Choose a provider:
+Choose a provider:
 
 | Provider | Endpoint | Free tier | Notes |
 |---|---|---|---|
@@ -187,17 +186,18 @@ The SDF does not operate a public Soroban RPC endpoint for mainnet. Choose a pro
 | Ankr | `https://rpc.ankr.com/stellar_soroban` | Yes | Budget option |
 | Self-hosted | `http://localhost:8000` | N/A | Best for validators |
 
-See [Stellar Mainnet Deployment](/guides/stellar-mainnet-deployment) for RPC rate limits,
-failover configuration, and retention window guidance.
+See [Stellar Mainnet Deployment](/guides/stellar-mainnet-deployment) for RPC rate limits, failover configuration, and retention window guidance.
 
-### Wraith contract IDs (pending)
+### Contract addresses (pending)
 
-| Contract | Mainnet address | Version |
-|---|---|---|
-| `stealth-announcer` | `CPLACEHOLDER_ANNOUNCER_MAINNET` | v2 |
-| `stealth-registry` | `CPLACEHOLDER_REGISTRY_MAINNET` | v1 |
-| `stealth-sender` | `CPLACEHOLDER_SENDER_MAINNET` | v1 |
-| `wraith-names` | `CPLACEHOLDER_NAMES_MAINNET` | v1 |
+All four contracts have `address: null` and `status: pending` on mainnet. They will be replaced with canonical addresses on mainnet launch:
+
+| Contract | Address | Version | Status |
+|---|---|---|---|
+| `stealth-announcer` | — | v2 | Pending |
+| `stealth-registry` | — | v1 | Pending |
+| `stealth-sender` | — | v1 | Pending |
+| `wraith-names` | — | v1 | Pending |
 
 ### Environment variables
 
@@ -206,28 +206,203 @@ STELLAR_NETWORK=mainnet
 STELLAR_NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
 STELLAR_HORIZON_URL=https://horizon.stellar.org
 STELLAR_RPC_URL=https://mainnet.stellar.validationcloud.io/v1/<YOUR_API_KEY>
-# Contract IDs will be published here on mainnet launch
+# Contract IDs will be read from contracts/manifest.json on mainnet launch
 ```
 
 ---
 
-## Quick comparison
+## Record provenance
 
-| | Testnet | Futurenet | Mainnet |
+Every network record in the manifest carries a `provenance` block that answers **where this data came from and how it was verified**:
+
+```json
+{
+  "provenance": {
+    "source": "@wraith-protocol/sdk/chains/stellar getDeployment(\"stellar\")",
+    "verifiedAt": "2026-07-29",
+    "method": "On-chain contract inspection via Soroban RPC, cross-checked against SDK TypeScript bindings"
+  }
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `source` | The system or process that produced the record (e.g. the SDK's `getDeployment`, the mainnet deployment pipeline, Soroban RPC inspection). |
+| `verifiedAt` | The date the record was last verified against the live chain. `null` means the record is pending and has not been verified on-chain. |
+| `method` | How verification was performed: on-chain inspection, SDK binding cross-check, or pending deployment. |
+
+Treat `provenance.source` as the authority for a contract address. If an address in your config does not match `provenance.source`, do not use it — it may be stale, a placeholder, or from an unofficial deployment.
+
+## Trust boundaries
+
+A network record crosses several trust boundaries. Know which party controls each field before you build on it.
+
+| Field | Controlled by | Trust boundary | Implication |
 |---|---|---|---|
-| Passphrase | `Test SDF Network ; September 2015` | `Test SDF Future Network ; October 2022` | `Public Global Stellar Network ; September 2015` |
-| Horizon | `https://horizon-testnet.stellar.org` | — | `https://horizon.stellar.org` |
-| Soroban RPC | `https://soroban-testnet.stellar.org` | `https://rpc-futurenet.stellar.org` | Provider (see above) |
-| Friendbot | `https://friendbot.stellar.org` | `https://friendbot-futurenet.stellar.org` | Not available |
-| Reset cadence | \~quarterly | On demand | Never |
-| Wraith contracts | Live | Not deployed | Pending |
-| Real value | No | No | Yes |
+| `networkPassphrase` | Wraith / Stellar protocol | Immutable | Never changes; safe to hard-code. |
+| `horizonUrl` | SDF (testnet/mainnet) | Immutable, external | Wraith does not operate Horizon; SDF can change or retire the endpoint. |
+| `sorobanUrl` | SDF (testnet) / RPC provider (mainnet) | External | Provider-operated. On mainnet you choose and authenticate the provider. |
+| `friendbotUrl` | SDF | External, testnet only | Funds test accounts; not available on mainnet. |
+| Contract addresses | Wraith (deployer/admin) | Mutable until mainnet | Can change on upgrade or redeploy. Always read the current value from the manifest. |
+| Admin / upgrade keys | Wraith governance | External to your app | Controls contract upgrades; never embedded in client-side config. |
 
----
+**Trust rule:** never treat an `external` field as part of your trust boundary. External endpoints can be rate-limited, change, or go down. Design for failover (see [Stellar Mainnet Deployment](/guides/stellar-mainnet-deployment) for RPC failover).
+
+## Update cadence
+
+| Layer | Changes when | Who updates | How to stay current |
+|---|---|---|---|
+| Network passphrase / horizonUrl | Never (immutable) | — | Hard-code safely. |
+| RPC / Friendbot URLs | Provider changes endpoint | SDF / RPC provider | Re-read manifest on deploy; monitor provider status pages. |
+| Contract addresses | Contract deploy or upgrade | Wraith deployer | Re-read manifest on each release; `verifiedAt` tells you when it was last confirmed on-chain. |
+| Testnet state | ~quarterly SDF reset | SDF | Watch [status.stellar.org](https://status.stellar.org) and `#stellar-dev`. All balances and contracts wiped. |
+| Futurenet state | On demand, without notice | SDF | Do not rely on Futurenet for integration testing. |
+
+Re-deploying your application does **not** refresh contract addresses. Read the manifest at runtime (or at build time via a CI step) so upgrades are picked up without a redeploy.
+
+## Safe network selection
+
+SDKs, indexers, and operators each select a network differently, but all must read from the manifest and respect field types.
+
+### SDK (client application)
+
+Use `Chain.Stellar` (or the `"stellar"` string) to select the network, then read `getDeployment("stellar")`. Reject any network whose contract address is `null` or `pending` unless you are explicitly targeting testnet development.
+
+```typescript
+import { getDeployment, DEPLOYMENTS } from "@wraith-protocol/sdk/chains/stellar";
+import { Server } from "@stellar/stellar-sdk/rpc";
+
+async function selectNetwork(network: "testnet" | "futurenet" | "mainnet") {
+  const deployment = getDeployment(network);
+
+  // Guard: do not point a client at a network with no live contracts.
+  if (!deployment.contracts.announcer) {
+    throw new Error(
+      `No live announcer contract on ${network}. status=${deployment.status}. ` +
+      "Use testnet for development or wait for mainnet launch.",
+    );
+  }
+
+  // Guard: never run real value against pending/unverified records.
+  if (network === "mainnet" && deployment.provenance?.verifiedAt === null) {
+    throw new Error("Mainnet contracts are pending verification. Do not use in production.");
+  }
+
+  const soroban = new Server(deployment.sorobanUrl);
+  return { deployment, soroban };
+}
+
+// Example: safe testnet selection
+const { deployment, soroban } = await selectNetwork("testnet");
+```
+
+`getDeployment` returns the record for the active SDK version. To see every network the SDK knows about, use `DEPLOYMENTS`. To read the full manifest (including `null`, `external`, and `pending` annotations) fetch `contracts/manifest.json` directly.
+
+### Indexer
+
+An indexer scans announcement events from Soroban RPC. It must:
+
+1. Read the announcer contract address from the manifest (not a hard-coded placeholder).
+2. Skip networks where `contracts.announcer.address` is `null`.
+3. Track `lastProcessedLedger` and respect RPC retention windows (~17,280 ledgers ≈ 24 hours on public RPC).
+4. Use an external RPC provider on mainnet with failover.
+
+```typescript
+import { getDeployment } from "@wraith-protocol/sdk/chains/stellar";
+import { Server } from "@stellar/stellar-sdk/rpc";
+
+async function buildIndexer(network: string) {
+  const deployment = getDeployment(network);
+  const announcerId = deployment.contracts?.announcer?.address;
+
+  if (!announcerId) {
+    throw new Error(`No announcer contract on ${network}; nothing to index.`);
+  }
+
+  const rpc = new Server(deployment.sorobanUrl);
+
+  const events = await rpc.getEvents({
+    startLedger: lastProcessedLedger,
+    filters: [{
+      type: "contract",
+      contractIds: [announcerId],
+      topics: [["announce"]],
+    }],
+  });
+
+  return events;
+}
+```
+
+If `sorobanUrl` is `null` (mainnet before you pick a provider), refuse to start until the operator configures an external RPC endpoint.
+
+### Operator
+
+An operator running a Spectre TEE instance on mainnet selects:
+
+* **Network:** `mainnet` with `networkPassphrase` = `Public Global Stellar Network ; September 2015`.
+* **RPC:** an external provider (Validation Cloud, QuickNode, Ankr, or self-hosted). Configure primary + fallback.
+* **Contract IDs:** read from the manifest after mainnet launch; never use placeholder `CPLACEHOLDER…` values.
+* **Admin key:** held in cold storage / multisig; controls contract upgrades. It is outside the application's trust boundary.
+
+```bash
+# .env — operator config, read manifest values at runtime
+STELLAR_NETWORK=mainnet
+STELLAR_NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
+STELLAR_HORIZON_URL=https://horizon.stellar.org
+STELLAR_RPC_URL_PRIMARY=https://mainnet.stellar.validationcloud.io/v1/<API_KEY>
+STELLAR_RPC_URL_FALLBACK=https://<slug>.stellar-mainnet.quiknode.pro/<API_KEY>
+# Contract IDs are resolved from contracts/manifest.json, not hard-coded
+```
+
+See [Stellar Mainnet Deployment](/guides/stellar-mainnet-deployment) for the full operator runbook: hardware, funding, monitoring, upgrade governance, and incident response.
+
+## Field types: null, external, pending, immutable
+
+Manifest fields carry type annotations that tell you how to handle them in code.
+
+| Type | Meaning | Example | Handling |
+|---|---|---|---|
+| `immutable` | Never changes after the record is created. | `networkPassphrase` | Safe to hard-code or cache indefinitely. |
+| `external` | Owned by a third party (SDF, RPC provider, subgraph host). Wraith does not control it. | `sorobanUrl` on mainnet | Read at runtime; design for failover; do not treat as part of your trust boundary. |
+| `pending` | Not yet deployed or determined. | Mainnet contract addresses | Do not use in production. Track readiness in `contracts/stellar/MAINNET_READINESS.md`. |
+| `null` | Field is absent or not applicable for this network. | `friendbotUrl` on mainnet; `horizonUrl` on Futurenet | Treat as `undefined` in code; branch on presence before use. |
+
+### Code example: handling each field type
+
+```typescript
+import { getDeployment } from "@wraith-protocol/sdk/chains/stellar";
+
+const deployment = getDeployment("stellar");
+
+// immutable — safe to hard-code
+const passphrase = deployment.networkPassphrase;
+
+// external — read at runtime, plan for failover
+const rpcUrl = deployment.sorobanUrl;
+if (!rpcUrl) {
+  throw new Error("sorobanUrl is null/external — configure an RPC provider before connecting.");
+}
+
+// pending — address absent until deployment
+const announcer = deployment.contracts.announcer;
+if (!announcer.address || announcer.status === "pending") {
+  throw new Error("Announcer not deployed on this network.");
+}
+
+// null — field not applicable
+const friendbot = deployment.friendbotUrl; // null on mainnet
+if (friendbot) {
+  await fetch(friendbot.replace("<G_ADDRESS>", address));
+}
+```
 
 ## Related resources
 
 <CardGroup cols={2}>
+  <Card title="Contracts Manifest" href="/contracts/manifest" icon="file-code">
+    Machine-readable contract registry — the single source of truth for addresses and network metadata
+  </Card>
   <Card title="Stellar Contracts Reference" href="/contracts/stellar" icon="file-code">
     Full interface specs for stealth-announcer, stealth-registry, stealth-sender, and wraith-names
   </Card>
